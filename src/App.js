@@ -1,24 +1,24 @@
-import logo from './logo.svg';
+import { Grid } from 'semantic-ui-react';
 import './App.css';
+import Simulator from './Simulator';
+import ControlPanel from './ControlPanel';
+import { useState } from 'react';
 
-function App() {
+const App = () => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isMouseOver, setIsMouseOver] = useState(false);
+
+  const mouseProps = { mousePos, setMousePos, isMouseOver, setIsMouseOver };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Grid className={'parent-grid'}>
+      <Grid.Column className={'simulator-grid'} width={11}>
+        <Simulator mouseProps={mouseProps} />
+      </Grid.Column>
+      <Grid.Column className={'control-panel-grid'} width={5}>
+        <ControlPanel mouseProps={mouseProps} />
+      </Grid.Column>
+    </Grid>
   );
 }
 
