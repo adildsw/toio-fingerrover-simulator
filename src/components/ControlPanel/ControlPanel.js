@@ -17,12 +17,12 @@ const WEBSITE_URL = 'https://ultimateinterface.com';
 const ControlPanel = (props) => {
 
     const { obstacleProps, toioProps, systemProps } = props;
-    const { position, rotation, target, status } = systemProps;
+    const { position, rotation, target, status, clearTarget } = systemProps;
     
     const renderObstacles = () => {
         let renderedObstacles = [];
         for (let i = 0; i < obstacleProps.obstacleCount; i++) {
-            renderedObstacles.push(<ObstacleItem key={i} idx={i} obstacleProps={obstacleProps} toioProps={toioProps} />);
+            renderedObstacles.push(<ObstacleItem key={i} idx={i} obstacleProps={obstacleProps} toioProps={toioProps} systemProps={systemProps} />);
         }
         return renderedObstacles;
     }
@@ -64,7 +64,7 @@ const ControlPanel = (props) => {
                     <Header className='status-item' size='small'>Target: <span>{status !== 0 && target.isActive ? '(' + target.x + ', ' + target.y + ')' : 'N/A'}</span></Header> 
                 </Grid.Column>
                 <Grid.Column width={9} className='status-right-container'>
-                    <div className='system-control-item stop-btn' >
+                    <div className='system-control-item stop-btn' onClick={clearTarget} >
                         <Icon name='stop' size='large' />
                     </div>
                     <div className='system-control-item' >

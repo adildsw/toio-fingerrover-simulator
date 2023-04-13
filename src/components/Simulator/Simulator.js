@@ -2,6 +2,7 @@ import { useState } from "react";
 import useImage from 'use-image';
 import { Stage, Layer, Circle, Image, Rect, Group, Arrow, Text, Line } from 'react-konva';
 import './Simulator.css'
+import { getNearestCirclePointWithinBounds } from "../../utils/MathUtils";
 
 // Toio Dimensions: 32mm x 32mm
 // Toio Mat Dimensions: 557mm x 557mm
@@ -9,7 +10,7 @@ import './Simulator.css'
 const Simulator = (props) => {
     const { mouseProps, toioProps, obstacleProps, systemProps } = props;
     const { toioSize, matSize, isAltMat, setIsAltMat } = toioProps;
-    const { position, rotation, target, status, setTarget } = systemProps;
+    const { position, rotation, target, status, moveToTarget, clearTarget } = systemProps;
     const { mousePos, setMousePos, isMouseOver, setIsMouseOver } = mouseProps;
 
     const { obstaclePadding } = obstacleProps;
@@ -31,14 +32,7 @@ const Simulator = (props) => {
             y: obstacle.y,
             draggable: true,
             dragBoundFunc: (pos) => {
-                const minX = obstacle.radius + obstaclePadding;
-                const maxX = matSize - obstacle.radius - obstaclePadding;
-                const minY = obstacle.radius + obstaclePadding;
-                const maxY = matSize - obstacle.radius - obstaclePadding;
-                return {
-                    x: pos.x < minX ? minX : pos.x > maxX ? maxX : pos.x,
-                    y: pos.y < minY ? minY : pos.y > maxY ? maxY : pos.y
-                }
+                return getNearestCirclePointWithinBounds(obstacle.radius + obstaclePadding, matSize, pos.x, pos.y);
             },
             onDragMove: (e) => {
                 const { x, y } = e.target.attrs;
@@ -55,18 +49,21 @@ const Simulator = (props) => {
                 !obstacle.isDisabled && 
                 <>
                     <Circle 
+                        key={'shadow' + obstacle.id}
                         fillEnabled={true} 
                         fill='#00000022'
                         radius={obstacle.radius + obstaclePadding} 
                         {...getObstacleDragProps(obstacle)}
                     />
                     <Circle 
+                        key={obstacle.id}
                         fillEnabled={true} 
                         fill='#00000042'
                         radius={obstacle.radius} 
                         {...getObstacleDragProps(obstacle)}
                     />
                     <Text
+                        key={'text' + obstacle.id}
                         text={obstacle.id}
                         x={obstacle.x}
                         y={obstacle.y}
@@ -80,6 +77,7 @@ const Simulator = (props) => {
                         {...getObstacleDragProps(obstacle)}
                     />
                     <Text
+                        key={'radius' + obstacle.id}
                         text={obstacle.radius + ' mm'}
                         x={obstacle.x}
                         y={obstacle.y}
@@ -96,10 +94,6 @@ const Simulator = (props) => {
         });
     }
 
-    const clearTarget = () => {
-        setTarget({ x: 0, y: 0, isActive: false });
-    }
-
     return (
         <div className="simulator">
             <Stage width={matSize} height={matSize}>
@@ -112,7 +106,7 @@ const Simulator = (props) => {
                         onMouseMove={(e) => { setMousePos({ x: e.evt.offsetX, y: e.evt.offsetY }); }}
                         onMouseEnter={() => { setIsMouseOver(true); }}
                         onMouseLeave={() => { setIsMouseOver(false); }}
-                        onClick={() => { if (isMouseOver) setTarget({ x: mousePos.x, y: mousePos.y, isActive: true }); }}
+                        onClick={() => { if (isMouseOver) moveToTarget(mousePos.x, mousePos.y); }}
                     />
 
                     {/* Toio */}
@@ -136,7 +130,7 @@ const Simulator = (props) => {
                                 x={0} 
                                 y={0} 
                             />
-                            <Arrow points={[0, 20, 0, 13 + toioSize / 2]} fill='grey' opacity={0.5} />
+                            <Arrow points={[20, 0, 13 + toioSize / 2, 0]} fill='grey' opacity={0.5} />
                         </Group>
                     }
 
@@ -154,7 +148,6 @@ const Simulator = (props) => {
                                 stroke='#c72b2b'
                                 strokeWidth={5}
                             />
-                            {/* Vertical line */}
                             <Line
                                 points={[target.x - 20 / 2, target.y + 20 / 2, target.x + 20 / 2, target.y - 20 / 2]}
                                 stroke='red'

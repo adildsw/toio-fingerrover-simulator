@@ -1,25 +1,23 @@
 import { Header, Icon } from "semantic-ui-react";
 
 import './ObstacleItem.css';
+import { getClosestPointToCircle, getNearestCirclePointWithinBounds } from "../../utils/MathUtils";
 
 const ObstacleItem = (props) => {
-    const { idx, obstacleProps, toioProps } = props;
+    const { idx, obstacleProps, toioProps, systemProps } = props;
     const { obstacles, setObstacles, minObstacleSize, maxObstacleSize, obstaclePadding } = obstacleProps;
     const { matSize } = toioProps;
+    const { position, moveToTarget, clearTarget } = systemProps;
 
     const obstacle = obstacles[idx];
 
     const setObstacleRadius = (radius) => {
         const newObstacles = [...obstacles];
         newObstacles[idx].radius = parseInt(radius);
-        
-        const minX = newObstacles[idx].radius + obstaclePadding;
-        const maxX = matSize - newObstacles[idx].radius - obstaclePadding;
-        const minY = newObstacles[idx].radius + obstaclePadding;
-        const maxY = matSize - newObstacles[idx].radius - obstaclePadding;
 
-        newObstacles[idx].x = newObstacles[idx].x < minX ? minX : newObstacles[idx].x > maxX ? maxX : newObstacles[idx].x;
-        newObstacles[idx].y = newObstacles[idx].y < minY ? minY : newObstacles[idx].y > maxY ? maxY : newObstacles[idx].y;
+        const newPos = getNearestCirclePointWithinBounds(newObstacles[idx].radius + obstaclePadding, matSize, newObstacles[idx].x, newObstacles[idx].y);
+        newObstacles[idx].x = newPos.x;
+        newObstacles[idx].y = newPos.y;
 
         setObstacles(newObstacles);
     }
@@ -31,8 +29,8 @@ const ObstacleItem = (props) => {
     }
 
     const navigateToObstacle = () => {
-        console.log("Navigating to obstacle " + obstacle.id);
-        // TODO: Navigate to obstacle
+        const targetPos = getClosestPointToCircle(position.x, position.y, obstacle.x, obstacle.y, obstacle.radius + obstaclePadding);
+        moveToTarget(targetPos.x, targetPos.y);
     }
 
     return (
@@ -49,7 +47,7 @@ const ObstacleItem = (props) => {
                     value={obstacle.radius}
                     min={minObstacleSize}
                     max={maxObstacleSize}
-                    onChange={(e) => { setObstacleRadius(e.target.value); }} 
+                    onChange={(e) => { setObstacleRadius(e.target.value); clearTarget(); }} 
                     disabled={obstacle.isDisabled}
                 />
 
@@ -58,7 +56,7 @@ const ObstacleItem = (props) => {
                 </div>
             </div>
             
-            <div className='obstacle-item-enable-btn' onClick={() => { setObstacleStatus(!obstacle.isDisabled); }}>
+            <div className='obstacle-item-enable-btn' onClick={() => { setObstacleStatus(!obstacle.isDisabled); clearTarget(); }}>
                 <Icon name={'eye' + (obstacle.isDisabled ? ' slash' : '')} size='large' color='grey' />
             </div>
         </div>
