@@ -1,16 +1,12 @@
-import { useState } from "react";
 import useImage from 'use-image';
 import { Stage, Layer, Circle, Image, Rect, Group, Arrow, Text, Line } from 'react-konva';
 import './Simulator.css'
-import { getNearestCirclePointWithinBounds } from "../../utils/MathUtils";
-
-// Toio Dimensions: 32mm x 32mm
-// Toio Mat Dimensions: 557mm x 557mm
+import { getNearestCirclePointWithinBounds } from "../../utils/Utils";
 
 const Simulator = (props) => {
     const { mouseProps, toioProps, obstacleProps, systemProps } = props;
-    const { toioSize, matSize, isAltMat, setIsAltMat } = toioProps;
-    const { position, rotation, target, status, moveToTarget, clearTarget } = systemProps;
+    const { toioSize, matSize, isAltMat } = toioProps;
+    const { toioStatus, target, moveToTarget, stopToio } = systemProps;
     const { mousePos, setMousePos, isMouseOver, setIsMouseOver } = mouseProps;
 
     const { obstaclePadding } = obstacleProps;
@@ -37,7 +33,7 @@ const Simulator = (props) => {
             onDragMove: (e) => {
                 const { x, y } = e.target.attrs;
                 setObstaclePosition(obstacle, x, y);
-                if (target.isActive) clearTarget();
+                if (target.isActive) stopToio();
             }
         }
     }
@@ -46,8 +42,8 @@ const Simulator = (props) => {
         const { obstacles } = obstacleProps;
         return obstacles.map((obstacle) => {
             return (
-                !obstacle.isDisabled && 
-                <>
+                obstacle.isActive && 
+                <Group key={'groupObstacle' + obstacle.id}>
                     <Circle 
                         key={'shadow' + obstacle.id}
                         fillEnabled={true} 
@@ -89,7 +85,7 @@ const Simulator = (props) => {
                         offsetY={-7}
                         {...getObstacleDragProps(obstacle)}
                     />
-                </>
+                </Group>
             )
         });
     }
@@ -106,12 +102,12 @@ const Simulator = (props) => {
                         onMouseMove={(e) => { setMousePos({ x: e.evt.offsetX, y: e.evt.offsetY }); }}
                         onMouseEnter={() => { setIsMouseOver(true); }}
                         onMouseLeave={() => { setIsMouseOver(false); }}
-                        onClick={() => { if (isMouseOver) moveToTarget(mousePos.x, mousePos.y); }}
+                        onClick={() => { if (isMouseOver && toioStatus.status !== 0) moveToTarget(mousePos.x, mousePos.y); }}
                     />
 
                     {/* Toio */}
-                    { status !== 0 && 
-                        <Group draggable x={position.x} y={position.y} rotation={rotation}>
+                    { toioStatus.status !== 0 && 
+                        <Group x={toioStatus.x} y={toioStatus.y} rotation={toioStatus.angle}>
                             <Rect
                                 fillEnabled={true}
                                 fill='white'
@@ -158,7 +154,7 @@ const Simulator = (props) => {
 
                     {/* Mouse */}
                     { 
-                        mouseProps.isMouseOver && 
+                        mouseProps.isMouseOver && toioStatus.status !== 0 &&
                         <Circle 
                             fillEnabled={false} 
                             stroke='grey' 

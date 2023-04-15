@@ -90,6 +90,20 @@
     opacity: 0.7;
 }
 
+.obstacle-item-locate-button-disabled {
+    width: 34px;
+    height: 34px;
+    margin: 8px 8px 0px 0px;
+    background: #c2c2c2;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 .obstacle-item-locate-button:hover:not(.obstacle-item-container-disabled > .obstacle-item-main-body > .obstacle-item-locate-button) {
     opacity: 1;
     cursor: pointer;
@@ -108,11 +122,16 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background: #c2c2c2;
-    opacity: 0.7;
+    background: #d2d2d2;
+    opacity: 1;
 }
 
 .obstacle-item-enable-btn:hover {
     opacity: 1;
+    background-color: #C2C2C2;
     cursor: pointer;
+}
+
+.obstacle-item-enable-btn:hover i {
+    color: #000 !important;
 }

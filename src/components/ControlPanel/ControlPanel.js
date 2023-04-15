@@ -1,11 +1,13 @@
 import { Divider, Grid, Header, Icon } from 'semantic-ui-react';
-import { saveAs } from 'file-saver';
+import { loadObstaclesFromConfigurations, saveObstacleConfigurations } from '../../utils/Utils';
+import SystemStatus from '../../utils/enums/SystemStatus';
 
 import TitleBar from "./TitleBar";
 import ObstacleItem from './ObstacleItem';
 
 import './ControlPanel.css';
-import { SYSTEM_STATUS } from '../../utils/SystemStatus';
+import { useRef } from 'react';
+
 
 const { shell } = window.require('electron');
 
@@ -15,9 +17,12 @@ const GITHUB_URL = 'https://github.com/adildsw/toio-fingerrover-simulator';
 const WEBSITE_URL = 'https://ultimateinterface.com';
 
 const ControlPanel = (props) => {
-
     const { obstacleProps, toioProps, systemProps } = props;
-    const { position, rotation, target, status, clearTarget } = systemProps;
+    const { toioStatus, target, stopToio, toioSpeed, setToioSpeed } = systemProps;
+    const { minToioSpeed, maxToioSpeed } = toioProps;
+    const { obstacles, setObstacles } = obstacleProps;
+
+    const fileInputRef = useRef(null);
     
     const renderObstacles = () => {
         let renderedObstacles = [];
@@ -27,26 +32,7 @@ const ControlPanel = (props) => {
         return renderedObstacles;
     }
 
-    const saveObstacleConfigurations = () => {
-        const obstacles = obstacleProps.obstacles;
-        const obstacleConfigurations = [];
-        for (let i = 0; i < obstacles.length; i++) {
-            const obstacle = obstacles[i];
-            obstacleConfigurations.push({
-                id: obstacle.id,
-                x: obstacle.x,
-                y: obstacle.y,
-                radius: obstacle.radius,
-                isDisabled: obstacle.isDisabled
-            });
-        }
-        const blob = new Blob([JSON.stringify(obstacleConfigurations)], {type: "text/plain;charset=utf-8"});
-        saveAs(blob, "obstacle_configurations.json");
-    }
-
-    const loadObstacleConfigurations = () => {
-
-    }
+ 
 
         
 
@@ -58,25 +44,55 @@ const ControlPanel = (props) => {
             <Divider className='control-divider' horizontal>System</Divider>
             <Grid className='status-container'>
                 <Grid.Column width={7} className='status-left-container'>
-                    <Header className='status-item' size='small'>Status: <span>{SYSTEM_STATUS[status]}</span></Header> 
-                    <Header className='status-item' size='small'>Position: <span>{status !== 0 ? '(' + position.x + ', ' + position.y + ')' : 'N/A'}</span></Header> 
-                    <Header className='status-item' size='small'>Rotation: <span>{status !== 0 ? rotation + '°' : 'N/A'}</span></Header> 
-                    <Header className='status-item' size='small'>Target: <span>{status !== 0 && target.isActive ? '(' + target.x + ', ' + target.y + ')' : 'N/A'}</span></Header> 
+                    <Header className='status-item' size='small'>Status: <span>{SystemStatus[toioStatus.status]}</span></Header> 
+                    <Header className='status-item' size='small'>Position: <span>{toioStatus.status !== 0 ? '(' + toioStatus.x + ', ' + toioStatus.y + ')' : 'N/A'}</span></Header> 
+                    <Header className='status-item' size='small'>Rotation: <span>{toioStatus.status !== 0 ? toioStatus.angle + '°' : 'N/A'}</span></Header> 
+                    <Header className='status-item' size='small'>Target: <span>{toioStatus.status !== 0 && target.isActive ? '(' + target.x + ', ' + target.y + ')' : 'N/A'}</span></Header> 
                 </Grid.Column>
                 <Grid.Column width={9} className='status-right-container'>
-                    <div className='system-control-item stop-btn' onClick={clearTarget} >
-                        <Icon name='stop' size='large' />
+                    <div className='status-right-subcontainer'>
+                        <div className='system-control-item reconnect-btn'>
+                            <Icon name='refresh' size='large' onClick={() => { 
+                                console.log("refreshing");
+                                window.location.reload();
+                            }} />
+                        </div>
+                        <div className='system-control-item stop-btn' onClick={stopToio}>
+                            <Icon name='stop' size='large' />
+                        </div>
                     </div>
-                    <div className='system-control-item' >
-                        <Icon name='file' size='large' />
-                    </div>
-                    <div className='system-control-item' onClick={saveObstacleConfigurations} >
-                        <Icon name='save' size='large' />
+                    <div className='speed-slider-body'>
+                        <div className='speed-slider-info'>
+                            <Header size='small'>Toio Speed: <span>{toioSpeed}</span></Header>
+                        </div>
+
+                        <input 
+                            type='range' 
+                            className='speed-slider-range' 
+                            value={toioSpeed}
+                            min={minToioSpeed}
+                            max={maxToioSpeed}
+                            onChange={(e) => { setToioSpeed(e.target.value); }} 
+                        />
                     </div>
                 </Grid.Column>
             </Grid>
 
             <Divider className='control-divider' horizontal>Navigation</Divider>
+            <div className='obstacle-state-control-container'>
+                <div className='obstacle-state-control' onClick={() => { fileInputRef.current.click(); }}>
+                    <Icon name='file' size='large' color='grey' />
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={(e) => { loadObstaclesFromConfigurations(e.target.files[0], setObstacles); }}
+                        style={{ display: 'none' }}
+                    />
+                </div>
+                <div className='obstacle-state-control' onClick={() => { saveObstacleConfigurations(obstacles); }}>
+                    <Icon name='save' size='large' color='grey' />
+                </div>
+            </div>
             {renderObstacles()}
 
             <Divider className='control-divider' horizontal>Resources</Divider>

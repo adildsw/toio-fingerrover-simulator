@@ -1,13 +1,13 @@
 import { Header, Icon } from "semantic-ui-react";
 
 import './ObstacleItem.css';
-import { getClosestPointToCircle, getNearestCirclePointWithinBounds } from "../../utils/MathUtils";
+import { getClosestPointToCircle, getNearestCirclePointWithinBounds } from "../../utils/Utils";
 
 const ObstacleItem = (props) => {
     const { idx, obstacleProps, toioProps, systemProps } = props;
     const { obstacles, setObstacles, minObstacleSize, maxObstacleSize, obstaclePadding } = obstacleProps;
     const { matSize } = toioProps;
-    const { position, moveToTarget, clearTarget } = systemProps;
+    const { toioStatus, moveToTarget, stopToio } = systemProps;
 
     const obstacle = obstacles[idx];
 
@@ -22,19 +22,19 @@ const ObstacleItem = (props) => {
         setObstacles(newObstacles);
     }
 
-    const setObstacleStatus = (isDisabled) => {
+    const setObstacleStatus = (isActive) => {
         const newObstacles = [...obstacles];
-        newObstacles[idx].isDisabled = isDisabled;
+        newObstacles[idx].isActive = isActive;
         setObstacles(newObstacles);
     }
 
     const navigateToObstacle = () => {
-        const targetPos = getClosestPointToCircle(position.x, position.y, obstacle.x, obstacle.y, obstacle.radius + obstaclePadding);
+        const targetPos = getClosestPointToCircle(toioStatus.x, toioStatus.y, obstacle.x, obstacle.y, obstacle.radius + obstaclePadding);
         moveToTarget(targetPos.x, targetPos.y);
     }
 
     return (
-        <div className={obstacle.isDisabled ? 'obstacle-item-container-disabled' : 'obstacle-item-container'}>
+        <div key={idx} className={obstacle.isActive ? 'obstacle-item-container' : 'obstacle-item-container-disabled'}>
             <div className='obstacle-item-main-body'>
                 <div className='obstacle-item-id'>
                     <Header className='obstacle-item-id-text' size='medium'>{obstacle.id}</Header>
@@ -47,17 +47,17 @@ const ObstacleItem = (props) => {
                     value={obstacle.radius}
                     min={minObstacleSize}
                     max={maxObstacleSize}
-                    onChange={(e) => { setObstacleRadius(e.target.value); clearTarget(); }} 
-                    disabled={obstacle.isDisabled}
+                    onChange={(e) => { setObstacleRadius(e.target.value); stopToio(); }} 
+                    disabled={!obstacle.isActive}
                 />
 
-                <div className='obstacle-item-locate-button' onClick={() => { if (!obstacle.isDisabled) navigateToObstacle(); }}>
+                <div className={toioStatus.status !== 0 ? 'obstacle-item-locate-button' : 'obstacle-item-locate-button-disabled'} onClick={() => { if (obstacle.isActive && toioStatus.status !== 0) navigateToObstacle(); }}>
                     <Icon name='location arrow' size='small' color='grey' />
                 </div>
             </div>
             
-            <div className='obstacle-item-enable-btn' onClick={() => { setObstacleStatus(!obstacle.isDisabled); clearTarget(); }}>
-                <Icon name={'eye' + (obstacle.isDisabled ? ' slash' : '')} size='large' color='grey' />
+            <div className='obstacle-item-enable-btn' onClick={() => { setObstacleStatus(!obstacle.isActive); stopToio(); }}>
+                <Icon name={'eye' + (obstacle.isActive ? '' : ' slash')} size='large' color='grey' />
             </div>
         </div>
     )
