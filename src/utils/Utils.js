@@ -1,31 +1,24 @@
 import { saveAs } from 'file-saver';
 
-const MAT_START = 45;
-const MAT_END = 455;
-const ALT_MAT_START = 545;
-const ALT_MAT_END = 955;
+const MAT_OFFSET = 45;
+const ALT_MAT_OFFSET = 545;
+const MAX_POSITION = 410;
 
-export const isToioInAltMat = (rawXPos) => {
-    if (rawXPos >= MAT_START && rawXPos <= MAT_END) {
-        return false;
-    }
-    else if (rawXPos >= ALT_MAT_START && rawXPos <= ALT_MAT_END) {
-        return true;
-    }
-    return false;
+export const isPositionInAltMat = (rawXPos) => {
+    return rawXPos > ALT_MAT_OFFSET;
 }
 
-export const getProcessedToioPosition = (rawXPos, rawYPos, boundSize) => {
-    const offset = isToioInAltMat(rawXPos) ? ALT_MAT_START : MAT_START;
-    const x = Math.floor((rawXPos - offset) / (MAT_END - MAT_START) * boundSize);
-    const y = Math.floor((rawYPos - MAT_START) / (MAT_END - MAT_START) * boundSize);
+export const getProcessedPosition = (rawXPos, rawYPos, boundSize) => {
+    const offset = isPositionInAltMat(rawXPos) ? ALT_MAT_OFFSET : MAT_OFFSET;
+    const x = Math.floor((rawXPos - offset) / MAX_POSITION * boundSize);
+    const y = Math.floor((rawYPos - MAT_OFFSET) / MAX_POSITION * boundSize);
     return { x: parseInt(x), y: parseInt(y) };
 }
 
-export const getRawToioPosition = (x, y, boundSize, isAltMat) => {
-    const offset = isAltMat ? ALT_MAT_START : MAT_START;
-    const rawXPos = Math.floor(x / boundSize * (MAT_END - MAT_START) + offset);
-    const rawYPos = Math.floor(y / boundSize * (MAT_END - MAT_START) + MAT_START);
+export const getRawPosition = (x, y, boundSize, isAltMat) => {
+    const offset = isAltMat ? ALT_MAT_OFFSET : MAT_OFFSET;
+    const rawXPos = Math.floor(x / boundSize * MAX_POSITION + offset);
+    const rawYPos = Math.floor(y / boundSize * MAX_POSITION + MAT_OFFSET);
     return { x: parseInt(rawXPos), y: parseInt(rawYPos) };
 }
 
@@ -44,6 +37,22 @@ export const generateObstacles = (count, minSize, maxSize, padding, boundSize) =
     }
     return obstacles;
 };
+
+export const getRawObstacleConfiguration = (obstacles, padding, boundSize, isAltMat) => {
+    const rawObstacles = [];
+    for (let i = 0; i < obstacles.length; i++) {
+        const obstacle = obstacles[i];
+        const rawPos = getRawPosition(obstacle.x, obstacle.y, boundSize, isAltMat);
+        rawObstacles.push({
+            id: obstacle.id,
+            x: rawPos.x,
+            y: rawPos.y,
+            radius: (obstacle.radius + padding) / boundSize * MAX_POSITION,
+            isActive: obstacle.isActive
+        });
+    }
+    return rawObstacles;
+}
 
 
 
@@ -109,7 +118,7 @@ export const saveObstacleConfigurations = (obstacles) => {
 
 export const loadObstaclesFromConfigurations = (configurationFile, setObstacles) => {
     if (!configurationFile) return;
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
         const obstacles = JSON.parse(e.target.result);

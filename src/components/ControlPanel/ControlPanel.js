@@ -51,11 +51,8 @@ const ControlPanel = (props) => {
                 </Grid.Column>
                 <Grid.Column width={9} className='status-right-container'>
                     <div className='status-right-subcontainer'>
-                        <div className='system-control-item reconnect-btn'>
-                            <Icon name='refresh' size='large' onClick={() => { 
-                                console.log("refreshing");
-                                window.location.reload();
-                            }} />
+                        <div className='system-control-item reconnect-btn' onClick={() => { window.location.reload(); }}>
+                            <Icon name='refresh' size='large' />
                         </div>
                         <div className='system-control-item stop-btn' onClick={stopToio}>
                             <Icon name='stop' size='large' />

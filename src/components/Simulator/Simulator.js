@@ -65,11 +65,11 @@ const Simulator = (props) => {
                         y={obstacle.y}
                         fill='#121212'
                         fontStyle='bold'
-                        fontSize={30}
+                        fontSize={20}
                         align='center'
                         verticalAlign='middle'
-                        offsetX={16}
-                        offsetY={22}
+                        offsetX={13}
+                        offsetY={14}
                         {...getObstacleDragProps(obstacle)}
                     />
                     <Text
@@ -78,16 +78,37 @@ const Simulator = (props) => {
                         x={obstacle.x}
                         y={obstacle.y}
                         fill='#121212'
-                        fontSize={14}
+                        fontSize={10}
                         align='center'
                         verticalAlign='middle'
-                        offsetX={22}
-                        offsetY={-7}
+                        offsetX={16}
+                        offsetY={-4}
                         {...getObstacleDragProps(obstacle)}
                     />
                 </Group>
             )
         });
+    }
+
+    const renderPath = () => {
+        const { path } = toioStatus;
+        const pathLines = [];
+        for (let i = 0; i < path.length - 1; i++) {
+            pathLines.push(
+                <Line
+                    key={'pathLine' + i}
+                    points={[path[i].x, path[i].y, path[i + 1].x, path[i + 1].y]}
+                    stroke='#c72b2b'
+                    strokeWidth={5}
+                    dash={[5, 5]}
+                />
+            );
+        }
+        return (
+            <Group key={'groupPath'}>
+                {pathLines}
+            </Group>
+        );
     }
 
     return (
@@ -150,6 +171,12 @@ const Simulator = (props) => {
                                 strokeWidth={5}
                             />
                         </Group>
+                    }
+
+                    {/* Auto-Nav Path */}
+                    {
+                        toioStatus.status !== 0 && target.isActive && toioStatus.path.length > 0 &&
+                        renderPath()
                     }
 
                     {/* Mouse */}

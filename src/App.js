@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Grid } from 'semantic-ui-react';
 import useWebSocket from 'react-use-websocket';
 
-import { generateObstacles, getProcessedToioPosition, getRawToioPosition, isToioInAltMat } from './utils/Utils';
+import { generateObstacles, getProcessedPosition, getRawObstacleConfiguration, getRawPosition, isPositionInAltMat } from './utils/Utils';
 import Simulator from './components/Simulator/Simulator';
 import ControlPanel from './components/ControlPanel/ControlPanel';
 
@@ -13,8 +13,8 @@ import Direction from './utils/enums/Direction';
 const BACKEND_URL = 'ws://192.168.0.152:8000';
 
 const OBSTACLE_COUNT = 4;
-const MIN_OBSTACLE_SIZE = 30;
-const MAX_OBSTACLE_SIZE = 90;
+const MIN_OBSTACLE_SIZE = 20;
+const MAX_OBSTACLE_SIZE = 80;
 const OBSTACLE_PADDING = 20;
 
 const TOIO_SIZE = 32;
@@ -47,17 +47,19 @@ const App = () => {
         onOpen: () => console.log('[STATUS] Backend connected'),
         onMessage: (event) => {
             var rawData = JSON.parse(event.data);
+            var processedPath = rawData.path.map((point) => {
+                return getProcessedPosition(point.x, point.y, MAT_SIZE);
+            });
             var processedData = {
                 ...rawData,
-                ...getProcessedToioPosition(rawData.x, rawData.y, MAT_SIZE),
+                ...getProcessedPosition(rawData.x, rawData.y, MAT_SIZE),
+                path: processedPath
             };
-            setToioStatus((prevState) => {
-                if (prevState.status === 3 && processedData.status === 1)  {
-                    setTarget({ x: 0, y: 0, isActive: false });
-                }
-                return processedData;
-            });
-            setIsAltMat(isToioInAltMat(rawData.x));
+            if (processedData.status === 0 || processedData.status === 1) {
+                setTarget({ x: 0, y: 0, isActive: false });
+            }
+            setToioStatus(processedData);
+            setIsAltMat(isPositionInAltMat(rawData.x));
         },
         retryOnError: true,
         shouldReconnect: (closeEvent) => true,
@@ -109,8 +111,8 @@ const App = () => {
         setControlData({
             type: 'auto',
             data: {
-                target: { ...getRawToioPosition(x, y, MAT_SIZE, isAltMat) },
-                obstacles: obstacles,
+                target: { ...getRawPosition(x, y, MAT_SIZE, isAltMat) },
+                obstacles: getRawObstacleConfiguration(obstacles, OBSTACLE_PADDING, MAT_SIZE, isAltMat),
                 speed: toioSpeed
             }
         });
