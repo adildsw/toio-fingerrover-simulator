@@ -22,13 +22,15 @@
     "react-use-websocket": "^4.3.1",
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.4",
+    "serve": "^14.2.0",
     "use-image": "^1.1.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "dev": "concurrently -k \"cross-env BROWSER=none npm start\" \"npm:frontend\" \"npm:backend\"",
+    "dev": "concurrently -k \"cross-env BROWSER=none npm start\" \"cross-env ELECTRON_IS_DEV=1 npm run frontend\" \"npm:backend\"",
+    "prod": "concurrently -k \"cross-env BROWSER=none serve -s build\" \"cross-env ELECTRON_IS_DEV=0 npm run frontend\" \"npm:backend\"",
     "frontend": "wait-on tcp:3000 && electron .",
     "backend": "npm run start --prefix backend"
   },

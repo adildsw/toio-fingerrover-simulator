@@ -16,11 +16,7 @@ function createWindow() {
     resizable: false,
   });
 
-  win.loadURL(
-    isDev
-      ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`
-  );
+  win.loadURL('http://localhost:3000');
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });
   }

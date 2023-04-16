@@ -61,6 +61,43 @@ const executeToioBackend = async () => {
 
     /*
     * |-----------------------------
+    * | HANDLING CONTROL REQUESTS
+    * |-----------------------------
+    */
+    wsServer.on('connection', function (connection) {
+        const userId = v4();
+        clients[userId] = connection;
+        console.log(`[STATUS] Frontend connected`);
+
+        clients[userId].on('message', function (message) {
+            const controlData = JSON.parse(message.toString());
+            console.log('[STATUS] Received control data:', controlData);
+
+            if (controlData.type === 'manual') {
+                handleManualControl(
+                    controlData.data.direction,
+                    controlData.data.speed
+                );
+            }
+            else if (controlData.type === 'auto') {
+                handleAutoControl(
+                    controlData.data.target,
+                    controlData.data.obstacles,
+                    controlData.data.speed
+                );
+            }
+            else if (controlData.type === 'close') {
+                stopToio();
+                cube.disconnect();
+                console.log('[STATUS] Closing server...');
+                process.exit();
+            }
+        });
+    });
+
+
+    /*
+    * |-----------------------------
     * | SCANNING FOR TOIO CUBE
     * |-----------------------------
     */
@@ -142,44 +179,6 @@ const executeToioBackend = async () => {
                 stopToio();
             });
     }
-
-
-    /*
-    * |-----------------------------
-    * | HANDLING CONTROL REQUESTS
-    * |-----------------------------
-    */
-    wsServer.on('connection', function (connection) {
-        const userId = v4();
-        clients[userId] = connection;
-        console.log(`[STATUS] Frontend connected`);
-
-        clients[userId].on('message', function (message) {
-            const controlData = JSON.parse(message.toString());
-            console.log('[STATUS] Received control data:', controlData);
-
-            if (controlData.type === 'manual') {
-                handleManualControl(
-                    controlData.data.direction,
-                    controlData.data.speed
-                );
-            }
-            else if (controlData.type === 'auto') {
-                handleAutoControl(
-                    controlData.data.target,
-                    controlData.data.obstacles,
-                    controlData.data.speed
-                );
-            }
-            else if (controlData.type === 'close') {
-                stopToio();
-                cube.disconnect();
-                console.log('[STATUS] Toio cube disconnected');
-                process.exit();
-            }
-            else stopToio();
-        });
-    });
 
 
     /*
