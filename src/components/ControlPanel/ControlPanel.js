@@ -18,7 +18,7 @@ const WEBSITE_URL = 'https://ultimateinterface.com';
 
 const ControlPanel = (props) => {
     const { obstacleProps, toioProps, systemProps } = props;
-    const { toioStatus, target, stopToio, toioSpeed, setToioSpeed } = systemProps;
+    const { toioStatus, target, stopToio, toioSpeed, setToioSpeed, closeServer } = systemProps;
     const { minToioSpeed, maxToioSpeed } = toioProps;
     const { obstacles, setObstacles } = obstacleProps;
 
@@ -32,14 +32,9 @@ const ControlPanel = (props) => {
         return renderedObstacles;
     }
 
- 
-
-        
-
-
     return (
         <div className='control-panel'>
-            <TitleBar />
+            <TitleBar closeServer={closeServer} />
             
             <Divider className='control-divider' horizontal>System</Divider>
             <Grid className='status-container'>

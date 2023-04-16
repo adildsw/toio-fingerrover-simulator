@@ -10,7 +10,7 @@ import './App.css';
 import Direction from './utils/enums/Direction';
 
 
-const BACKEND_URL = 'ws://192.168.0.152:8000';
+const BACKEND_URL = 'ws://127.0.0.1:8000';
 
 const OBSTACLE_COUNT = 4;
 const MIN_OBSTACLE_SIZE = 20;
@@ -118,10 +118,15 @@ const App = () => {
         });
     }
 
+    const closeServer = () => {
+        setControlData({...controlData, type: 'close'});
+    }
+
+
     const mouseProps = { mousePos, setMousePos, isMouseOver, setIsMouseOver };
     const obstacleProps = { obstacles, setObstacles, obstacleCount: OBSTACLE_COUNT, minObstacleSize: MIN_OBSTACLE_SIZE, maxObstacleSize: MAX_OBSTACLE_SIZE, obstaclePadding: OBSTACLE_PADDING };
     const toioProps = { toioSize: TOIO_SIZE, matSize: MAT_SIZE, isAltMat, setIsAltMat, minToioSpeed: MIN_TOIO_SPEED, maxToioSpeed: MAX_TOIO_SPEED };
-    const systemProps = { toioStatus, target, toioSpeed, setToioSpeed, moveToTarget, stopToio };
+    const systemProps = { toioStatus, target, toioSpeed, setToioSpeed, moveToTarget, stopToio, closeServer };
 
     return (
         <Grid className={'parent-grid'}>
