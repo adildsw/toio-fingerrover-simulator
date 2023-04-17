@@ -80,11 +80,16 @@ const executeToioBackend = async () => {
                 );
             }
             else if (controlData.type === 'auto') {
-                handleAutoControl(
-                    controlData.data.target,
-                    controlData.data.obstacles,
-                    controlData.data.speed
-                );
+                try {
+                    handleAutoControl(
+                        controlData.data.target,
+                        controlData.data.obstacles,
+                        controlData.data.speed
+                    );
+                } catch (error) {
+                    stopToio();
+                    console.log('[ERROR] Could not find path to target');
+                }
             }
             else if (controlData.type === 'close') {
                 stopToio();
@@ -156,12 +161,18 @@ const executeToioBackend = async () => {
     const handleAutoControl = (target, obstacles, speed) => {
         targetPoint = target;
         var { normalizedSource, normalizedTarget, normalizedObstacles } = normalizeAutoNavData(toioStatus, target, obstacles);
-
+        
         updateObstacleMap(normalizedObstacles);
         
-        var path = pathFinder.findPath(normalizedSource.x, normalizedSource.y, normalizedTarget.x, normalizedTarget.y, grid.clone());
+        var path = pathFinder.findPath(
+            normalizedSource.x, 
+            normalizedSource.y, 
+            normalizedTarget.x, 
+            normalizedTarget.y, 
+            grid.clone()
+        );
         path = PF.Util.smoothenPath(grid.clone(), path);
-
+        
         var formattedPath = [];
         for (let i = 0; i < path.length; i++) {
             const offset = isPositionInAltMat(toioStatus.x, toioStatus.y) ? ALT_MAT_OFFSET : MAT_OFFSET;
@@ -171,6 +182,7 @@ const executeToioBackend = async () => {
         toioStatus['status'] = 3;
         toioStatus['path'] = formattedPath;
         console.log(`[STATUS] Auto-navigating to (${normalizedTarget.x}, ${normalizedTarget.y})`);
+        console.log('[STATUS] Path: ', formattedPath)
 
         cube
             .moveTo(formattedPath, { moveType: 0, maxSpeed: speed, speedType: 3, timeout: 0, overwrite: true })

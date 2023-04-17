@@ -98,9 +98,9 @@ const Simulator = (props) => {
                 <Line
                     key={'pathLine' + i}
                     points={[path[i].x, path[i].y, path[i + 1].x, path[i + 1].y]}
-                    stroke='#c72b2b'
-                    strokeWidth={5}
-                    dash={[5, 5]}
+                    stroke='#828282'
+                    strokeWidth={2}
+                    dash={[2, 3]}
                 />
             );
         }

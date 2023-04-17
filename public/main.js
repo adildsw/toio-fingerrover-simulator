@@ -1,5 +1,4 @@
 const path = require('path');
-
 const { app, BrowserWindow } = require('electron');
 const isDev = require('electron-is-dev');
 
@@ -14,6 +13,8 @@ function createWindow() {
       contextIsolation: false,
     },
     resizable: false,
+    icon: path.join(__dirname, 'public', 'favicon.ico'),
+    title: 'toio-fingerrover-simulator',
   });
 
   win.loadURL('http://localhost:3000');
