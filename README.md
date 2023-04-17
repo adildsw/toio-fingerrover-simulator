@@ -15,12 +15,13 @@ In order to build and run the simulator on your computer, make sure you meet the
 > This library depends on [noble](https://github.com/noble/noble), so follow [noble's prerequisites](https://github.com/noble/noble#prerequisites) please. <br>
 > Windows : needs Bluetooth 4.0 USB adapter. This video is good for beginners - [Bluetooth LE with Node.js and Noble on Windows](https://www.youtube.com/watch?v=mL9B8wuEdms&feature=youtu.be&t=1m46s)
 
+**NOTE:** The simulator was tested on an *M1 MacBook Air* running *macOS Ventura 13.0* and [*Node.js v16.13.1*](https://nodejs.org/en/blog/release/v16.13.1)
+
+### Simulating FingerRover
 For simulating FingerRover using toio, you will additionally need the following hardware:
 
 - 3D-Printed [**Finger Rest Mount**](./public/assets/toio-fingerrest.stl)
 - [**Stainless Steel Ball Bearing**](https://www.mcmaster.com/4668K338/)
-
-**NOTE:** The simulator was tested on an *M1 MacBook Air* running *macOS Ventura 13.0* and [*Node.js v16.13.1*](https://nodejs.org/en/blog/release/v16.13.1)
 
 ### Building the Simulator
 Once all the prerequisites are met, you can use the commands below to build the simulator:
