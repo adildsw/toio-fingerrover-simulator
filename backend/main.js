@@ -19,6 +19,7 @@ const executeToioBackend = async () => {
     const MAT_OFFSET = 45;
     const ALT_MAT_OFFSET = 545;
 
+    var isConnected = false;
     const toioStatus = { x: 0, y: 0, angle: 0, status: 0, path: [] };
     var targetPoint = { x: 0, y: 0 };
     var obstacleConfiguration = [];
@@ -73,6 +74,8 @@ const executeToioBackend = async () => {
             const controlData = JSON.parse(message.toString());
             console.log('[STATUS] Received control data:', controlData);
 
+            if (!isConnected) return;
+
             if (controlData.type === 'manual') {
                 handleManualControl(
                     controlData.data.direction,
@@ -110,8 +113,8 @@ const executeToioBackend = async () => {
     console.log('[STATUS] Toio cube detected, connecting...');
 
     await cube.connect();
+    isConnected = true;
     console.log('[STATUS] Toio cube connected');
-
 
     /*
     * |-----------------------------
